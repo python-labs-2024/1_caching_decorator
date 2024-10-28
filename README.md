@@ -38,7 +38,11 @@ pip install .
 Пример использования
 
 ```python
-pass
+from caching_decorator import cache
+
+@cache(depth=5)
+def compute(x, y, factor=1):
+    return x * y * factor
 ```
 
 ## Contributing
