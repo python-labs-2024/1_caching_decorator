@@ -13,7 +13,7 @@ from collections import deque
 from functools import wraps
 
 
-def cache(depth=10):
+def cache(depth=10, policy="LRU"):
     def decorator(func):
         cache = dict()
         access = deque()
@@ -23,17 +23,20 @@ def cache(depth=10):
             key = (*args, *kwargs.items())
 
             if key in cache:
-                access.remove(key)
-                access.append(key)
+                if policy == "LRU":
+                    access.remove(key)
+                    access.append(key)
                 return cache[key]
-
-            if len(cache) == depth:
-                oldest = access.popleft()
-                del cache[oldest]
 
             result = func(*args, **kwargs)
             cache[key] = result
             access.append(key)
+
+            if len(cache) > depth:
+                if policy == "LRU":
+                    oldest_key = access.popleft()
+
+                del cache[oldest_key]
 
             return result
 
