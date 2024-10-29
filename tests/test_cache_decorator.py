@@ -1,3 +1,4 @@
+import pytest
 from caching_decorator import cache
 
 
@@ -34,6 +35,8 @@ def test_cache_eviction():
     slow_function(2)
     assert slow_function.call_count == 2  # Должно быть 2 вызова
 
+    slow_function(2)
+    assert slow_function.call_count == 2
     # Вызов с новым значением вытесняет самое старое значение (1)
     slow_function(3)
     assert slow_function.call_count == 3  # Еще один вызов
