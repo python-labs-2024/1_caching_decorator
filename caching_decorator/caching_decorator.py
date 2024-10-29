@@ -33,9 +33,7 @@ def cache(depth=10, policy="LRU"):
             access.append(key)
 
             if len(cache) > depth:
-                if policy == "LRU":
-                    oldest_key = access.popleft()
-
+                oldest_key = access.popleft()
                 del cache[oldest_key]
 
             return result
