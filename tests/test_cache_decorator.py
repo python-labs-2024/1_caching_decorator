@@ -95,3 +95,32 @@ def test_cache_with_kwargs():
     # Новый вызов с другим значением ключевого аргумента
     assert slow_function(3, power=3) == 27
     assert slow_function.call_count == 2  # Должен быть вызов функции
+
+
+def test_cache_eviction_FIFO():
+    """Проверяет, что кэш очищает старые значения при превышении глубины."""
+
+    @cache(depth=2, policy="FIFO")
+    def slow_function(x):
+        slow_function.call_count += 1
+        return x * x
+
+    # Инициализируем счетчик вызовов
+    slow_function.call_count = 0
+
+    slow_function(1)
+    slow_function(2)
+    assert slow_function.call_count == 2  # Должно быть 2 вызова
+
+    slow_function(2)
+    assert slow_function.call_count == 2
+    # Вызов с новым значением вытесняет самое старое значение (1)
+    slow_function(3)
+    assert slow_function.call_count == 3  # Еще один вызов
+
+    # Повторный вызов для 1 должен пересчитаться, так как он вытеснен
+    slow_function(1)
+    assert slow_function.call_count == 4  # Пересчитывается заново
+
+    slow_function(2)
+    assert slow_function.call_count == 5  # Должно быть 5 вызова
