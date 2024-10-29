@@ -23,7 +23,7 @@ def cache(depth=10, policy="LRU"):
             key = (*args, *kwargs.items())
 
             if key in cache:
-                if policy == "LRU":
+                if policy in ["LRU", "MRU"]:
                     access.remove(key)
                     access.append(key)
                 return cache[key]
@@ -33,9 +33,9 @@ def cache(depth=10, policy="LRU"):
             access.append(key)
 
             if len(cache) > depth:
-                if policy == "LRU" or policy == "FIFO":
+                if policy in ["LRU", "FIFO"]:
                     oldest_key = access.popleft()
-                elif policy == "LIFO":
+                elif policy in ["LIFO", "MRU"]:
                     oldest_key = access.pop()
                 del cache[oldest_key]
 
