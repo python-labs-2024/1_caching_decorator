@@ -3,7 +3,7 @@ from caching_decorator import cache
 
 
 def test_caching():
-    """Проверяет, что результат кэшируется и функция не выполняется повторно при политике LRU."""
+    """Проверяет, что результат кэшируется и функция не выполняется повторно."""
 
     @cache(depth=3)
     def slow_function(x):
@@ -20,8 +20,8 @@ def test_caching():
     assert slow_function.call_count == 1  # Функция должна быть вызвана только один раз
 
 
-def test_cache_eviction():
-    """Проверяет, что кэш очищает старые значения при превышении глубины."""
+def test_cache_eviction_LRU():
+    """Проверяет, что кэш очищает старые значения при превышении глубины  при политике LRU."""
 
     @cache(depth=2)
     def slow_function(x):
@@ -37,7 +37,7 @@ def test_cache_eviction():
 
     slow_function(2)
     assert slow_function.call_count == 2
-    # Вызов с новым значением вытесняет самое старое значение (1)
+    # Вызов с новым значением вытесняет менее используемое значение (1)
     slow_function(3)
     assert slow_function.call_count == 3  # Еще один вызов
 
@@ -149,4 +149,29 @@ def test_cache_eviction_LIFO():
     assert slow_function.call_count == 3
 
     slow_function(3)
-    assert slow_function.call_count == 4
+    assert slow_function.call_count == 3
+
+
+def test_cache_eviction_MRU():
+    """Проверяет, что кэш очищает старые значения при превышении глубины при политике LIFO."""
+
+    @cache(depth=2, policy="MRU")
+    def slow_function(x):
+        slow_function.call_count += 1
+        return x * x
+
+    # Инициализируем счетчик вызовов
+    slow_function.call_count = 0
+
+    slow_function(1)
+    slow_function(2)
+    assert slow_function.call_count == 2
+
+    slow_function(2)
+    assert slow_function.call_count == 2
+
+    slow_function(3)
+    assert slow_function.call_count == 3
+
+    slow_function(1)
+    assert slow_function.call_count == 3
