@@ -41,3 +41,34 @@ def test_cache_eviction():
     # Повторный вызов для 1 должен пересчитаться, так как он вытеснен
     slow_function(1)
     assert slow_function.call_count == 4  # Пересчитывается заново
+
+
+def test_multiple_functions():
+    """Проверяет, что кэш работает независимо для нескольких функций."""
+
+    @cache(depth=2)
+    def square(x):
+        square.call_count += 1
+        return x * x
+
+    @cache(depth=2)
+    def double(x):
+        double.call_count += 1
+        return x * 2
+
+    # Инициализируем счетчики вызовов
+    square.call_count = 0
+    double.call_count = 0
+
+    # Вызываем обе функции с одинаковыми аргументами
+    square(3)
+    square(3)
+    assert square.call_count == 1  # Должен быть один вызов функции square
+
+    double(3)
+    double(3)
+    assert double.call_count == 1  # Должен быть один вызов функции double
+
+    # Проверка независимости кэша
+    assert square.call_count == 1
+    assert double.call_count == 1
