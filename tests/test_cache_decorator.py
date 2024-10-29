@@ -72,3 +72,23 @@ def test_multiple_functions():
     # Проверка независимости кэша
     assert square.call_count == 1
     assert double.call_count == 1
+
+
+def test_cache_with_kwargs():
+    """Проверяет, что кэширование работает корректно с аргументами-ключевыми словами."""
+
+    @cache(depth=2)
+    def slow_function(x, power=2):
+        slow_function.call_count += 1
+        return x**power
+
+    # Инициализируем счетчик вызовов
+    slow_function.call_count = 0
+
+    assert slow_function(3, power=2) == 9
+    assert slow_function(3, power=2) == 9
+    assert slow_function.call_count == 1  # Второй вызов должен использовать кэш
+
+    # Новый вызов с другим значением ключевого аргумента
+    assert slow_function(3, power=3) == 27
+    assert slow_function.call_count == 2  # Должен быть вызов функции
