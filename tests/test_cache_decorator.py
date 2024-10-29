@@ -3,7 +3,7 @@ from caching_decorator import cache
 
 
 def test_caching():
-    """Проверяет, что результат кэшируется и функция не выполняется повторно."""
+    """Проверяет, что результат кэшируется и функция не выполняется повторно при политике LRU."""
 
     @cache(depth=3)
     def slow_function(x):
@@ -98,9 +98,36 @@ def test_cache_with_kwargs():
 
 
 def test_cache_eviction_FIFO():
-    """Проверяет, что кэш очищает старые значения при превышении глубины."""
+    """Проверяет, что кэш очищает старые значения при превышении глубины при политике FIFO."""
 
     @cache(depth=2, policy="FIFO")
+    def slow_function(x):
+        slow_function.call_count += 1
+        return x * x
+
+    slow_function.call_count = 0
+
+    slow_function(1)
+    slow_function(2)
+    assert slow_function.call_count == 2
+
+    slow_function(2)
+    assert slow_function.call_count == 2
+
+    slow_function(3)
+    assert slow_function.call_count == 3
+
+    slow_function(1)
+    assert slow_function.call_count == 4
+
+    slow_function(2)
+    assert slow_function.call_count == 5
+
+
+def test_cache_eviction_LIFO():
+    """Проверяет, что кэш очищает старые значения при превышении глубины при политике LIFO."""
+
+    @cache(depth=2, policy="LIFO")
     def slow_function(x):
         slow_function.call_count += 1
         return x * x
@@ -110,17 +137,16 @@ def test_cache_eviction_FIFO():
 
     slow_function(1)
     slow_function(2)
-    assert slow_function.call_count == 2  # Должно быть 2 вызова
+    assert slow_function.call_count == 2
 
     slow_function(2)
     assert slow_function.call_count == 2
-    # Вызов с новым значением вытесняет самое старое значение (1)
+
     slow_function(3)
-    assert slow_function.call_count == 3  # Еще один вызов
+    assert slow_function.call_count == 3
 
-    # Повторный вызов для 1 должен пересчитаться, так как он вытеснен
     slow_function(1)
-    assert slow_function.call_count == 4  # Пересчитывается заново
+    assert slow_function.call_count == 3
 
-    slow_function(2)
-    assert slow_function.call_count == 5  # Должно быть 5 вызова
+    slow_function(3)
+    assert slow_function.call_count == 4
