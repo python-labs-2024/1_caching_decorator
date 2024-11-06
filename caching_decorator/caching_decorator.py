@@ -15,6 +15,9 @@ from functools import wraps
 
 def cache(depth=10, policy="LRU"):
     def decorator(func):
+        if policy not in ["LRU", "FIFO", "LIFO", "MRU"]:
+            raise ValueError("Wrong substitution policy")
+
         cache = dict()
         access = deque()
 
