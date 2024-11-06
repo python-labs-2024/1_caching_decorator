@@ -107,3 +107,11 @@ def test_caching_negative_depth():
 
     with pytest.raises(ValueError):
         slow_function(10)
+
+
+def test_caching_wrong_policy():
+    with pytest.raises(ValueError):
+
+        @cache(depth=3, policy="KIKO")
+        def slow_function(x):
+            return x
