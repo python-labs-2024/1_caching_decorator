@@ -50,6 +50,16 @@ def compute(x, y, factor=1):
     return x * y * factor
 ```
 
+```python
+from caching_decorator import cache
+
+@cache(depth=5, policy = "MRU")
+def compute(x, y, factor=1):
+    return x * y * factor
+```
+Декоратор поддерживает только хэшируемые типы дынных.
+
+
 ## Contributing
 
 Предварительно нужно создать и активировать виртуальное окружение, а также установить в него зависимости проекта
