@@ -22,18 +22,24 @@ def cache(depth=10, policy="LRU"):
         def wrapper(*args, **kwargs):
             key = (*args, *kwargs.items())
 
-            if key in cache:
-                if policy in ["LRU", "MRU"]:
-                    access.remove(key)
-                    access.append(key)
-                return cache[key]
+            try:
+                if key in cache:
+                    if policy in ["LRU", "MRU"]:
+                        access.remove(key)
+                        access.append(key)
+                    return cache[key]
+            except:
+                raise TypeError("The type of this argument is not hashable")
 
-            if len(cache) + 1 > depth:
-                if policy in ["LRU", "FIFO"]:
-                    oldest_key = access.popleft()
-                elif policy in ["LIFO", "MRU"]:
-                    oldest_key = access.pop()
-                del cache[oldest_key]
+            if depth != None:
+                if len(cache) + 1 > depth:
+                    if policy in ["LRU", "FIFO"]:
+                        oldest_key = access.popleft()
+                    elif policy in ["LIFO", "MRU"]:
+                        oldest_key = access.pop()
+                    del cache[oldest_key]
+            elif depth < 1:
+                raise ValueError("Depth cannot be less than 1")
 
             result = func(*args, **kwargs)
             cache[key] = result
