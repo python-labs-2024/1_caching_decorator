@@ -1,4 +1,5 @@
 from caching_decorator import cache
+import pytest
 
 
 def test_caching():
@@ -68,3 +69,41 @@ def test_cache_with_kwargs():
     # Новый вызов с другим значением ключевого аргумента
     assert slow_function(3, power=3) == 27
     assert slow_function.call_count == 2  # Должен быть вызов функции
+
+
+def test_caching_infinity_depth():
+    @cache(depth=None)
+    def slow_function(x):
+        slow_function.call_count += 1
+        return x * x
+
+    slow_function.call_count = 0
+
+    slow_function(1)
+    slow_function(2)
+    assert slow_function.call_count == 2
+
+    slow_function(2)
+    assert slow_function.call_count == 2
+    slow_function(3)
+    assert slow_function.call_count == 3
+    slow_function(4)
+    assert slow_function.call_count == 4
+
+
+def test_caching_not_hashable_type():
+    @cache(depth=2)
+    def slow_function(x):
+        return x[0]
+
+    with pytest.raises(TypeError):
+        slow_function(["a", "b"])
+
+
+def test_caching_negative_depth():
+    @cache(depth=-3)
+    def slow_function(x):
+        return x
+
+    with pytest.raises(ValueError):
+        slow_function(10)
