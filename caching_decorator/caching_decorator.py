@@ -25,14 +25,11 @@ def cache(depth=10, policy="LRU"):
         def wrapper(*args, **kwargs):
             key = (*args, *kwargs.items())
 
-            try:
-                if key in cache:
-                    if policy in ["LRU", "MRU"]:
-                        access.remove(key)
-                        access.append(key)
-                    return cache[key]
-            except:
-                raise TypeError("The type of this argument is not hashable")
+            if key in cache:
+                if policy in ["LRU", "MRU"]:
+                    access.remove(key)
+                    access.append(key)
+                return cache[key]
 
             if depth is not None and depth > 0:
                 if len(cache) + 1 > depth:

@@ -57,7 +57,19 @@ from caching_decorator import cache
 def compute(x, y, factor=1):
     return x * y * factor
 ```
-Декоратор поддерживает только хэшируемые типы дынных.
+
+Ограничения:
+
+
+Декоратор поддерживает только хэшируемые типы дынных.  
+Глубина может быть бесконечной, если задать значение переменной depth = None:
+```python
+from caching_decorator import cache
+
+@cache(depth=None, policy = "MRU")
+def compute(x, y, factor=1):
+    return x * y * factor
+```
 
 
 ## Contributing
