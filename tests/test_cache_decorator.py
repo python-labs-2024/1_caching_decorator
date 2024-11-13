@@ -1,5 +1,6 @@
-from caching_decorator import cache
 import pytest
+
+from caching_decorator import cache
 
 
 def test_caching():
