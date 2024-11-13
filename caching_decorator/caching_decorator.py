@@ -15,6 +15,9 @@ from functools import wraps
 
 def cache(depth=10, policy="LRU"):
     def decorator(func):
+        if policy not in ["LRU", "FIFO", "LIFO", "MRU"]:
+            raise ValueError("Wrong substitution policy")
+
         cache = dict()
         access = deque()
 
@@ -23,20 +26,24 @@ def cache(depth=10, policy="LRU"):
             key = (*args, *kwargs.items())
 
             if key in cache:
-                if policy == "LRU":
+                if policy in ["LRU", "MRU"]:
                     access.remove(key)
                     access.append(key)
                 return cache[key]
 
+            if depth is not None and depth > 0:
+                if len(cache) + 1 > depth:
+                    if policy in ["LRU", "FIFO"]:
+                        oldest_key = access.popleft()
+                    elif policy in ["LIFO", "MRU"]:
+                        oldest_key = access.pop()
+                    del cache[oldest_key]
+            elif depth is not None and depth < 1:
+                raise ValueError("Depth cannot be less than 1")
+
             result = func(*args, **kwargs)
             cache[key] = result
             access.append(key)
-
-            if len(cache) > depth:
-                if policy == "LRU":
-                    oldest_key = access.popleft()
-
-                del cache[oldest_key]
 
             return result
 
